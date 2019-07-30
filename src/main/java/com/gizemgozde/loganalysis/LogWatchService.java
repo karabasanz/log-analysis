@@ -6,11 +6,8 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -29,14 +26,15 @@ public class LogWatchService {
 
         keys = new HashMap<>();
 
-        String directoryName = "/home/gizem/dev/nunoc/log-analysis/log/";
+        String directoryName = "log/";
         FileAlterationObserver observer = new FileAlterationObserver(directoryName);
         FileAlterationMonitor monitor = new FileAlterationMonitor(200);
         FileAlterationListener listener = new FileAlterationListenerAdaptor() {
             @Override
             public void onFileCreate(File file) {
                 System.out.println("file created " + file.getAbsolutePath());
-                // code for processing creation event
+
+                readFileLineByLine(file, 1);
             }
 
             @Override
@@ -56,29 +54,27 @@ public class LogWatchService {
                 } else {
                     lineNumber = keys.get(file.getName());
                 }
-                FileInputStream fis = null;
-                try {
-                    Optional<String> first = Files.lines(Paths.get(directoryName + file.getName())).skip(lineNumber - 1).findFirst();
-                    if(first.isPresent()){
-                        String str = first.get();
-                        System.out.println("Content at " + lineNumber + " Number:- " + str);
-                        fis = new FileInputStream(file);
-                        //Construct BufferedReader from InputStreamReader
-                        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 
-                        String line = null;
-                        while ((line = br.readLine()) != null) {
-                            System.out.println("Content at " + lineNumber + " Number:- " + line);
+                readFileLineByLine(file, lineNumber);
+            }
+
+            private void readFileLineByLine(File file, int lineNumber) {
+                boolean finished = false;
+                while (!finished) {
+                    try {
+                        Optional<String> first = Files.lines(Paths.get(directoryName + file.getName())).skip(lineNumber - 1).findFirst();
+                        if (first.isPresent()) {
+                            String str = first.get();
+                            System.out.println(file.getName()+" --- "+"Content at " + lineNumber + " Number:- " + str);
                             lineNumber++;
+
+                        } else {
+                            keys.put(file.getName(), lineNumber);
+                            finished = true;
                         }
-                        keys.put(file.getName(),lineNumber);
-
-                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         };

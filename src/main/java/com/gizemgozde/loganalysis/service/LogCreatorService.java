@@ -1,10 +1,8 @@
 package com.gizemgozde.loganalysis.service;
 
-import com.gizemgozde.loganalysis.LogWatchService;
 import com.gizemgozde.loganalysis.model.Log;
 import com.gizemgozde.loganalysis.model.LogLevel;
 import com.gizemgozde.loganalysis.model.ServerCity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -24,12 +22,9 @@ public class LogCreatorService {
     public static String filePath = "log/out";
     public static Integer filePathCount = 1;
     public static final int MAX_FILE_SIZE = 1024 * 1024 * 2;
-    int count = 0;
+    private int count = 0;
 
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-
-    @Autowired
-    private LogWatchService logWatchService;
 
 
     private Log createLog() {
@@ -48,10 +43,11 @@ public class LogCreatorService {
 
 
         File fout;
-        if (!checkFileSize(filePath + "_" + filePathCount+".txt")) {
+        if (!checkFileSize(filePath + "_" + filePathCount + ".txt")) {
             filePathCount++;
+            count = 0;
         }
-        fout = new File(filePath + "_" + filePathCount+".txt");
+        fout = new File(filePath + "_" + filePathCount + ".txt");
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(fout, true);
