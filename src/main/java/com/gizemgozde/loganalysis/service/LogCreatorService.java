@@ -21,8 +21,9 @@ import java.util.Date;
 @Service
 public class LogCreatorService {
 
-    public static final String FILE_PATH = "log/out.txt";
-    public static final int filePathCount = 1;
+    public static String filePath = "log/out";
+    public static Integer filePathCount = 1;
+    public static final int MAX_FILE_SIZE = 1024 * 1024 * 2;
     int count = 0;
 
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
@@ -46,20 +47,21 @@ public class LogCreatorService {
     public void writeLogToFile() {
 
 
-        if(!checkFileSize(FILE_PATH)){
-            // path change
+        File fout;
+        if (!checkFileSize(filePath + "_" + filePathCount+".txt")) {
+            filePathCount++;
         }
-        File fout = new File(FILE_PATH);
+        fout = new File(filePath + "_" + filePathCount+".txt");
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(fout,true);
+            fos = new FileOutputStream(fout, true);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-                Log log = createLog();
-                System.out.println("count  ---- "+ log.getCount());
-                System.out.println("level : " + log.getLevel());
-                System.out.println("detail : " + log.getDetail());
-                bw.write(log.toString());
-                bw.newLine();
+            Log log = createLog();
+            System.out.println("count  ---- " + log.getCount());
+//            System.out.println("level : " + log.getLevel());
+//            System.out.println("detail : " + log.getDetail());
+            bw.write(log.toString());
+            bw.newLine();
             bw.close();
 
         } catch (IOException e) {
@@ -68,7 +70,9 @@ public class LogCreatorService {
     }
 
     private boolean checkFileSize(String filePath) {
-        return false;
+        File file = new File(filePath);
+        long fileSizeInBytes = file.length();
+        return fileSizeInBytes < MAX_FILE_SIZE;
     }
 
 
