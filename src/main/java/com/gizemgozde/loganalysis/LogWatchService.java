@@ -39,6 +39,8 @@ public class LogWatchService {
         producer = new KafkaProducer<>(props);
         Runtime.getRuntime().addShutdownHook(new Thread(producer::close));
 
+
+
         String directoryName = "log/";
         FileAlterationObserver observer = new FileAlterationObserver(directoryName);
         FileAlterationMonitor monitor = new FileAlterationMonitor(200);
@@ -80,7 +82,7 @@ public class LogWatchService {
                             String str = first.get();
                             System.out.println(file.getName() + " --- " + "Content at " + lineNumber + " Number:- " + str);
 
-                            ProducerRecord<String, String> record = new ProducerRecord<>("gizem", str.split("\\s+")[4], str);
+                            ProducerRecord<String, String> record = new ProducerRecord<>("demoteb", str.split("\\s+")[4], str);
 
                             producer.send(record, (RecordMetadata r, Exception e) -> {
                                 if (e != null) {
